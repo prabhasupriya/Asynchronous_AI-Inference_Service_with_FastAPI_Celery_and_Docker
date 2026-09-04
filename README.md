@@ -320,3 +320,8 @@ whether Postgres is needed). In short:
 - `/status` stuck on `PENDING` almost always means the worker crashed on
   startup (check `docker compose logs worker`) or the backend URL is
   misconfigured.
+
+## watch youtude video here
+[click here](https://youtu.be/fn_srZucXKI)
+
+
