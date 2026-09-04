@@ -1,0 +1,57 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: inference_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - inference_net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: inference_api
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - MODEL_PATH=${MODEL_PATH:-ml/artifacts/model.pkl}
+      - VECTORIZER_PATH=${VECTORIZER_PATH:-ml/artifacts/vectorizer.pkl}
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - inference_net
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: inference_worker
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - MODEL_PATH=${MODEL_PATH:-ml/artifacts/model.pkl}
+      - VECTORIZER_PATH=${VECTORIZER_PATH:-ml/artifacts/vectorizer.pkl}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - inference_net
+
+networks:
+  inference_net:
+    driver: bridge

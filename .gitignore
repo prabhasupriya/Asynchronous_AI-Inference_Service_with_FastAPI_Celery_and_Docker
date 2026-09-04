@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.env
+*.log
+
+# Keep artifacts dir but note: if .pkl files are large, consider
+# excluding them and generating via `python -m ml.train` instead
+# (see README "Model Artifacts" section).
+# ml/artifacts/*.pkl
+
+.DS_Store
+.idea/
+.vscode/
